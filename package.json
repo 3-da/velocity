@@ -40,6 +40,7 @@
     "@types/cookie-parser": "^1.4.9",
     "@types/nodemailer": "^7.0.2",
     "@types/stripe": "^8.0.416",
+    "@vercel/analytics": "^2.0.1",
     "argon2": "^0.44.0",
     "axios": "1.12.2",
     "class-transformer": "^0.5.1",
