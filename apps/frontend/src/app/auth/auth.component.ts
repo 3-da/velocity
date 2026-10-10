@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -39,7 +40,9 @@ import { FieldErrorComponent } from '../../shared/components/field-error/field-e
   styleUrl: './auth.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AuthComponent {
+export class AuthComponent implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   protected activeTab = 0;
   protected readonly loginForm: FormGroup;
   protected readonly registrationForm: FormGroup;
@@ -65,6 +68,16 @@ export class AuthComponent {
     'Credits never expire and there is no membership',
     'Free cancellation up to 24 hours before the ride',
   ];
+
+  ngOnInit(): void {
+    if (this.route.snapshot.queryParamMap.get('demo') !== 'true') return;
+    if (this.authService.isAuthenticated()) {
+      void this.router.navigateByUrl('/training-sessions');
+      return;
+    }
+
+    void this.onDemoLogin();
+  }
 
   protected selectTab(value: number): void {
     this.activeTab = value;

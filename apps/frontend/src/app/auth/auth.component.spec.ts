@@ -1,3 +1,5 @@
+import { ActivatedRoute, Router, provideRouter } from '@angular/router';
+import { AuthService } from '../../shared/services/auth.service';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -14,7 +16,7 @@ describe('Auth', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AuthComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting(), MessageService],
+      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting(), MessageService],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AuthComponent);
@@ -24,6 +26,27 @@ describe('Auth', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+
+  describe('portfolio demo entry', () => {
+    it.each([null, 'false', 'true'])('logs in only for the explicit demo flag %s', async (flag) => {
+      vi.spyOn(TestBed.inject(ActivatedRoute).snapshot.queryParamMap, 'get').mockReturnValue(flag);
+      const login = vi.spyOn(TestBed.inject(AuthService), 'loginWithNavigation').mockResolvedValue({ success: true });
+      vi.spyOn(TestBed.inject(AuthService), 'isAuthenticated').mockReturnValue(false);
+      component.ngOnInit();
+      expect(login).toHaveBeenCalledTimes(flag === 'true' ? 1 : 0);
+    });
+
+    it('preserves an existing session when entering from the portfolio', () => {
+      vi.spyOn(TestBed.inject(ActivatedRoute).snapshot.queryParamMap, 'get').mockReturnValue('true');
+      vi.spyOn(TestBed.inject(AuthService), 'isAuthenticated').mockReturnValue(true);
+      const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+      const login = vi.spyOn(TestBed.inject(AuthService), 'loginWithNavigation');
+      component.ngOnInit();
+      expect(navigate).toHaveBeenCalledWith('/training-sessions');
+      expect(login).not.toHaveBeenCalled();
+    });
   });
 
   describe('ageValidator', () => {
